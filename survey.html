@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ハラスメントに関するアンケート</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    body {
+      font-family: "Meiryo UI", "Hiragino Kaku Gothic ProN", sans-serif;
+      background-color: #f4f6f8;
+      color: #222;
+      margin: 0;
+      padding: 16px;
+      line-height: 1.6;
+    }
+    .container {
+      max-width: 680px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 24px 20px;
+      border: 1px solid #d0d7de;
+    }
+    h1 {
+      font-size: 1.35rem;
+      margin-top: 0;
+      border-bottom: 2px solid #2b579a;
+      padding-bottom: 8px;
+    }
+    .purpose {
+      background: #f0f4f9;
+      padding: 12px;
+      font-size: 0.92rem;
+      margin-bottom: 20px;
+      border-left: 4px solid #2b579a;
+    }
+    .section-title {
+      font-size: 1.05rem;
+      font-weight: bold;
+      background: #eef2f6;
+      padding: 8px 12px;
+      margin: 24px 0 12px;
+      border-left: 4px solid #333;
+    }
+    .question-block {
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    .question-title {
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+    .badge-req {
+      background: #d93025;
+      color: #fff;
+      font-size: 0.75rem;
+      padding: 2px 6px;
+      margin-left: 6px;
+      vertical-align: middle;
+    }
+    .badge-opt {
+      background: #6b7280;
+      color: #fff;
+      font-size: 0.75rem;
+      padding: 2px 6px;
+      margin-left: 6px;
+      vertical-align: middle;
+    }
+    .sub-note {
+      font-size: 0.85rem;
+      color: #555;
+      margin-bottom: 8px;
+    }
+    label.option-item {
+      display: flex;
+      align-items: center;
+      padding: 10px 12px;
+      margin-bottom: 6px;
+      border: 1px solid #d1d5db;
+      background: #fafafa;
+      cursor: pointer;
+    }
+    label.option-item:hover {
+      background: #f0f4f9;
+    }
+    label.option-item input {
+      margin-right: 10px;
+      transform: scale(1.2);
+    }
+    .none-option {
+      margin-bottom: 12px !important;
+      background: #fff !important;
+      border-color: #9ca3af !important;
+    }
+    textarea {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 10px;
+      font-size: 1rem;
+      font-family: inherit;
+      border: 1px solid #9ca3af;
+      resize: vertical;
+    }
+    button.submit-btn {
+      width: 100%;
+      padding: 14px;
+      font-size: 1.05rem;
+      font-weight: bold;
+      color: #fff;
+      background: #2b579a;
+      border: none;
+      cursor: pointer;
+      margin-top: 12px;
+    }
+    button.submit-btn:disabled {
+      background: #9ca3af;
+      cursor: not-allowed;
+    }
+    .status-msg {
+      margin-top: 16px;
+      padding: 14px;
+      font-weight: bold;
+      display: none;
+    }
+    .status-error {
+      background: #fde8e8;
+      color: #9b1c1c;
+      border: 1px solid #f8b4b4;
+    }
+    .status-success {
+      background: #def7ec;
+      color: #03543f;
+      border: 1px solid #84e1bc;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>ハラスメントに関するアンケート</h1>
+  <div class="purpose">
+    <strong>目的：</strong>職場環境改善のため、現状を把握するアンケートです。<br>
+    ※本アンケートは無記名です。回答者が特定される情報は記録されません。
+  </div>
+
+  <form id="surveyForm">
+    <!-- 1. 基本情報 -->
+    <div class="section-title">１．基本情報</div>
+    <div class="question-block">
+      <div class="question-title">該当するものを1つ選択してください<span class="badge-req">必須</span></div>
+      <label class="option-item"><input type="radio" name="basic_role" value="管理職" required>管理職</label>
+      <label class="option-item"><input type="radio" name="basic_role" value="一般社員">一般社員</label>
+      <label class="option-item"><input type="radio" name="basic_role" value="契約・派遣社員">契約・派遣社員</label>
+      <label class="option-item"><input type="radio" name="basic_role" value="その他">その他</label>
+      <label class="option-item"><input type="radio" name="basic_role" value="回答しない">回答しない</label>
+    </div>
+
+    <!-- 2. ハラスメントに関する認識 -->
+    <div class="section-title">２．ハラスメントに関する認識</div>
+    <div class="question-block">
+      <div class="question-title">Ｑ１．ハラスメント防止方針・相談窓口を知っていますか。<span class="badge-req">必須</span></div>
+      <label class="option-item"><input type="radio" name="q1_policy" value="よく知っている" required>よく知っている</label>
+      <label class="option-item"><input type="radio" name="q1_policy" value="ある程度知っている">ある程度知っている</label>
+      <label class="option-item"><input type="radio" name="q1_policy" value="知らない">知らない</label>
+    </div>
+
+    <!-- 3. 過去1年間の状況について -->
+    <div class="section-title">３．過去１年間の状況について</div>
+
+    <!-- Q2 -->
+    <div class="question-block" data-checkbox-group="q2_power">
+      <div class="question-title">＜パワーハラスメント＞<br>Ｑ２．以下のような行為を見聞きした、または受けたことがありますか。<span class="badge-req">必須</span></div>
+      <div class="sub-note">※「ない」以外の場合は複数選択できます</div>
+      <label class="option-item none-option"><input type="checkbox" name="q2_power" value="ない" data-none="true">ない</label>
+      <label class="option-item"><input type="checkbox" name="q2_power" value="威圧的な叱責">威圧的な叱責</label>
+      <label class="option-item"><input type="checkbox" name="q2_power" value="無視・仲間外れ">無視・仲間外れ</label>
+      <label class="option-item"><input type="checkbox" name="q2_power" value="不適切な業務指示">不適切な業務指示</label>
+      <label class="option-item"><input type="checkbox" name="q2_power" value="過度な私生活への干渉">過度な私生活への干渉</label>
+    </div>
+
+    <!-- Q3 -->
+    <div class="question-block" data-checkbox-group="q3_sexual">
+      <div class="question-title">＜セクシャルハラスメント＞<br>Ｑ３．以下のような行為を見聞きした、または受けたことがありますか。<span class="badge-req">必須</span></div>
+      <div class="sub-note">※「ない」以外の場合は複数選択できます</div>
+      <label class="option-item none-option"><input type="checkbox" name="q3_sexual" value="ない" data-none="true">ない</label>
+      <label class="option-item"><input type="checkbox" name="q3_sexual" value="性的な冗談・発言">性的な冗談・発言</label>
+      <label class="option-item"><input type="checkbox" name="q3_sexual" value="容姿に関する不快な発言">容姿に関する不快な発言</label>
+      <label class="option-item"><input type="checkbox" name="q3_sexual" value="不必要な接触">不必要な接触</label>
+      <label class="option-item"><input type="checkbox" name="q3_sexual" value="執拗な誘い">執拗な誘い</label>
+    </div>
+
+    <!-- Q4 -->
+    <div class="question-block" data-checkbox-group="q4_maternity">
+      <div class="question-title">＜妊娠・出産・育児等に関するハラスメント（マタハラ）＞<br>Ｑ４．以下のような行為を見聞きした、または受けたことがありますか。<span class="badge-req">必須</span></div>
+      <div class="sub-note">※「ない」以外の場合は複数選択できます</div>
+      <label class="option-item none-option"><input type="checkbox" name="q4_maternity" value="ない" data-none="true">ない</label>
+      <label class="option-item"><input type="checkbox" name="q4_maternity" value="制度利用の阻害・いやがらせ">制度利用の阻害・いやがらせ</label>
+      <label class="option-item"><input type="checkbox" name="q4_maternity" value="不利益な扱いの示唆">不利益な扱いの示唆</label>
+      <label class="option-item"><input type="checkbox" name="q4_maternity" value="復職者への不当な対応">復職者への不当な対応</label>
+    </div>
+
+    <!-- Q5 -->
+    <div class="question-block" data-checkbox-group="q5_customer">
+      <div class="question-title">＜カスタマーハラスメント＞<br>Ｑ５．顧客・取引先等から以下の行為を受けたことがありますか。<span class="badge-req">必須</span></div>
+      <div class="sub-note">※「ない」以外の場合は複数選択できます</div>
+      <label class="option-item none-option"><input type="checkbox" name="q5_customer" value="ない" data-none="true">ない</label>
+      <label class="option-item"><input type="checkbox" name="q5_customer" value="暴言">暴言</label>
+      <label class="option-item"><input type="checkbox" name="q5_customer" value="威嚇・脅迫">威嚇・脅迫</label>
+      <label class="option-item"><input type="checkbox" name="q5_customer" value="長時間拘束">長時間拘束</label>
+      <label class="option-item"><input type="checkbox" name="q5_customer" value="過剰要求">過剰要求</label>
+      <label class="option-item"><input type="checkbox" name="q5_customer" value="ＳＮＳ等での中傷">ＳＮＳ等での中傷</label>
+    </div>
+
+    <!-- 4. 職場環境について -->
+    <div class="section-title">４．職場環境について</div>
+    <div class="question-block">
+      <div class="question-title">Ｑ６．現在の職場はハラスメントが発生しにくい環境だと思いますか。<span class="badge-req">必須</span></div>
+      <label class="option-item"><input type="radio" name="q6_env_prevent" value="そう思う" required>そう思う</label>
+      <label class="option-item"><input type="radio" name="q6_env_prevent" value="ややそう思う">ややそう思う</label>
+      <label class="option-item"><input type="radio" name="q6_env_prevent" value="あまりそう思わない">あまりそう思わない</label>
+      <label class="option-item"><input type="radio" name="q6_env_prevent" value="思わない">思わない</label>
+    </div>
+
+    <div class="question-block">
+      <div class="question-title">Ｑ７．ハラスメントを受けた場合、相談しやすい環境だと思いますか。<span class="badge-req">必須</span></div>
+      <label class="option-item"><input type="radio" name="q7_env_consult" value="そう思う" required>そう思う</label>
+      <label class="option-item"><input type="radio" name="q7_env_consult" value="ややそう思う">ややそう思う</label>
+      <label class="option-item"><input type="radio" name="q7_env_consult" value="あまりそう思わない">あまりそう思わない</label>
+      <label class="option-item"><input type="radio" name="q7_env_consult" value="思わない">思わない</label>
+    </div>
+
+    <!-- 5. 自由記述 -->
+    <div class="section-title">５．自由記述</div>
+    <div class="question-block">
+      <div class="question-title">Ｑ８．ご意見等があればご記入ください<span class="badge-opt">任意</span></div>
+      <textarea name="q8_comment" rows="5" placeholder="自由にご記入ください（空欄のまま送信も可能です）"></textarea>
+    </div>
+
+    <button type="submit" id="submitBtn" class="submit-btn">アンケートを送信する</button>
+    <div id="statusMsg" class="status-msg"></div>
+  </form>
+</div>
+
+<script>
+  // ★既存のSupabaseプロジェクトのURLとanon keyに書き換えてください
+  const SUPABASE_URL = 'https://ffpuqxyufqugotivqkgi.supabase.co';
+  const SUPABASE_ANON_KEY = 'sb_publishable_5247tSd7ptdrSv6y0972rA_zm_6t99i';
+  const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  // 「ない」と他の選択肢の排他制御
+  document.querySelectorAll('[data-checkbox-group]').forEach(group => {
+    const checkboxes = group.querySelectorAll('input[type="checkbox"]');
+    const noneBox = group.querySelector('input[data-none="true"]');
+
+    checkboxes.forEach(cb => {
+      cb.addEventListener('change', () => {
+        if (cb === noneBox && cb.checked) {
+          // 「ない」にチェックが入ったら他をすべて外す
+          checkboxes.forEach(other => {
+            if (other !== noneBox) other.checked = false;
+          });
+        } else if (cb !== noneBox && cb.checked) {
+          // 他の項目にチェックが入ったら「ない」を外す
+          if (noneBox) noneBox.checked = false;
+        }
+      });
+    });
+  });
+
+  // フォーム送信処理
+  document.getElementById('surveyForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const statusMsg = document.getElementById('statusMsg');
+    const submitBtn = document.getElementById('submitBtn');
+    statusMsg.style.display = 'none';
+
+    const formData = new FormData(e.target);
+
+    // 複数選択の取得と必須チェック（Q2〜Q5）
+    const q2 = formData.getAll('q2_power');
+    const q3 = formData.getAll('q3_sexual');
+    const q4 = formData.getAll('q4_maternity');
+    const q5 = formData.getAll('q5_customer');
+
+    if (q2.length === 0 || q3.length === 0 || q4.length === 0 || q5.length === 0) {
+      statusMsg.textContent = 'エラー：Ｑ２〜Ｑ５で未選択の項目があります。「ない」または該当項目を選択してください。';
+      statusMsg.className = 'status-msg status-error';
+      statusMsg.style.display = 'block';
+      return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = '送信中...';
+
+    const payload = {
+      basic_role: formData.get('basic_role'),
+      q1_policy: formData.get('q1_policy'),
+      q2_power: q2.join(' / '),
+      q3_sexual: q3.join(' / '),
+      q4_maternity: q4.join(' / '),
+      q5_customer: q5.join(' / '),
+      q6_env_prevent: formData.get('q6_env_prevent'),
+      q7_env_consult: formData.get('q7_env_consult'),
+      q8_comment: (formData.get('q8_comment') || '').trim()
+    };
+
+    const { error } = await supabaseClient
+      .from('harassment_survey')
+      .insert([payload]);
+
+    if (error) {
+      statusMsg.textContent = '送信に失敗しました。時間をおいて再度お試しください。（' + error.message + '）';
+      statusMsg.className = 'status-msg status-error';
+      statusMsg.style.display = 'block';
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'アンケートを送信する';
+    } else {
+      e.target.reset();
+      submitBtn.style.display = 'none';
+      statusMsg.textContent = 'ご協力ありがとうございました。アンケートの送信が完了しました。';
+      statusMsg.className = 'status-msg status-success';
+      statusMsg.style.display = 'block';
+    }
+  });
+</script>
+
+</body>
+</html>
